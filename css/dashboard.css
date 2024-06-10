@@ -1,57 +1,62 @@
+body {
+  background-color: #f8f9fa; /* Light grey background */
+  color: #333; /* Dark grey text */
+  font-family: 'Arial', sans-serif; /* Standard Arial font */
+}
 
+h1, h2 {
+  color: #007bff; /* Light blue color for headings */
+}
 
-.cards-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    gap: 20px;
-    padding: 20px;
+.container, .cards-container {
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 20px;
 }
 
 .card {
-    background: linear-gradient(to right, #0F2027, #203A43, #2C5364); /* A gradient from dark blue to lighter blue */
-    color: #ffffff; /* White text for contrast and readability */
-    border: none; /* No border for a cleaner look */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
-    border-radius: 8px; /* Rounded corners */
-    padding: 20px;
-    margin: 10px;
-    flex: 1;
-    min-width: 200px; /* Minimum width so they don't get too narrow */
-    text-align: center; /* Center text */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.2s ease-in-out; /* Smooth transition for hover effect */
-  }
-  
-  .card:hover {
-    transform: scale(1.05); /* Slightly enlarge the card on hover */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Larger shadow on hover for a 'lifting' effect */
-  }
-  
-  .card-title {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .card-text {
-    font-size: 2rem;
-    font-weight: bold;
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .row {
+  background: linear-gradient(to right, #0F2027, #203A43, #2C5364); /* Dark to light blue gradient */
+  color: #ffffff; /* White text for contrast */
+  border: none; /* No border for a cleaner look */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+  border-radius: 8px; /* Rounded corners */
+  padding: 20px;
+  margin: 10px;
+  flex: 1;
+  min-width: 200px; /* Minimum width so they don't get too narrow */
+  text-align: center; /* Center text */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease-in-out; /* Smooth transition for hover effect */
+}
+
+.card:hover {
+  transform: scale(1.05); /* Slightly enlarge the card on hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Larger shadow on hover for a 'lifting' effect */
+}
+
+.card-title {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-text {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container, .cards-container {
       flex-direction: column;
-    }
-  
-    .card {
+  }
+
+  .card {
       width: 100%;
       margin-bottom: 1rem;
-    }
   }
-  
-
-
+}
