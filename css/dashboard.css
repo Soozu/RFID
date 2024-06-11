@@ -1,62 +1,67 @@
+/* General Styles */
 body {
-  background-color: #f8f9fa; /* Light grey background */
-  color: #333; /* Dark grey text */
-  font-family: 'Arial', sans-serif; /* Standard Arial font */
+  background-color: #f0f4f8; /* Very light gray that reduces eye strain */
+  color: #333; /* Dark gray for text to ensure good contrast */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern, clean font */
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px; /* Optimizes reading line length */
+  margin: 0 auto; /* Centers container in the page */
+  padding: 20px;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+  background-color: #ffffff; /* Pure white background for sections */
+  border-radius: 8px; /* Smooths corners */
 }
 
 h1, h2 {
-  color: #007bff; /* Light blue color for headings */
+  color: #007bff; /* Consistent light blue for all heading levels */
 }
 
-.container, .cards-container {
-  padding: 20px;
+/* Cards Styling */
+.cards-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
-  gap: 20px;
+  justify-content: space-around; /* Ensures even distribution of space around items */
+  gap: 20px; /* Maintains spacing between elements */
 }
 
 .card {
-  background: linear-gradient(to right, #0F2027, #203A43, #2C5364); /* Dark to light blue gradient */
-  color: #ffffff; /* White text for contrast */
-  border: none; /* No border for a cleaner look */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
-  border-radius: 8px; /* Rounded corners */
-  padding: 20px;
+  flex: 1 1 200px; /* Allows flex items to grow and shrink but not smaller than 200px */
+  background: #ffffff; /* White background for contrast with the text */
+  color: #333;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft, larger shadow for 3D effect */
+  border-radius: 8px;
+  padding: 15px;
   margin: 10px;
-  flex: 1;
-  min-width: 200px; /* Minimum width so they don't get too narrow */
-  text-align: center; /* Center text */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  transition: transform 0.2s ease-in-out; /* Smooth transition for hover effect */
+  text-align: center;
+  transition: all 0.3s ease-in-out; /* Smooth transition for hover effects */
 }
 
 .card:hover {
-  transform: scale(1.05); /* Slightly enlarge the card on hover */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Larger shadow on hover for a 'lifting' effect */
+  transform: translateY(-5px); /* Moves card up slightly on hover */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover for lifting effect */
 }
 
 .card-title {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+  font-size: 18px; /* Larger font size for titles */
+  margin-bottom: 10px; /* Adds space below the title */
 }
 
 .card-text {
-  font-size: 3rem;
+  font-size: 24px; /* Large font size for key figures to stand out */
   font-weight: bold;
 }
 
-/* Responsive Design */
+/* Responsive Design for smaller screens */
 @media (max-width: 768px) {
-  .container, .cards-container {
+  .cards-container {
       flex-direction: column;
   }
 
   .card {
-      width: 100%;
-      margin-bottom: 1rem;
+      width: 100%; /* Full width on small screens */
+      margin-bottom: 20px;
   }
 }
