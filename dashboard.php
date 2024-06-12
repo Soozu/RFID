@@ -6,6 +6,23 @@ if (!isset($_SESSION['Admin-name'])) {
 
 include 'connectDB.php'; // Ensure this path is correct
 
+// Example function to fetch data
+function getMonthlyData($sql) {
+    global $conn;
+    $result = $conn->query($sql);
+    $data = array_fill(1, 12, 0);  // Pre-fill the array for all months with zero
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $data[(int)$row['Month']] = (int)$row['Count'];
+        }
+    }
+    return $data;
+}
+
+$enrollmentData = getMonthlyData("SELECT MONTH(user_date) AS Month, COUNT(*) AS Count FROM users GROUP BY MONTH(user_date)");
+$presentData = getMonthlyData("SELECT MONTH(checkindate) AS Month, COUNT(*) AS Count FROM users_logs WHERE timeout IS NOT NULL GROUP BY MONTH(checkindate)");
+$absentData = getMonthlyData("SELECT MONTH(checkindate) AS Month, COUNT(*) AS Count FROM users_logs WHERE timeout IS NULL GROUP BY MONTH(checkindate)");
+
 // Fetch student logs total
 $sqlLogsTotal = "SELECT COUNT(*) as logs_total FROM users_logs";
 $result = $conn->query($sqlLogsTotal);
@@ -43,6 +60,11 @@ $conn->close();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+
 </head>
 <body>
  
@@ -90,124 +112,123 @@ $conn->close();
     </div>
 </div>
 
-<!-- <div id='calendar'></div>
-<div class="modal fade" id="event_entry_modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">Add New Event</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-            <form id="eventForm">
-    <div class="form-group">
-        <label for="event_name">Event name:</label>
-        <input type="text" id="event_name" name="event_name" class="form-control" required>
-    </div>
-    <div class="form-group">
-        <label for="event_start_date">Start Date:</label>
-        <input type="date" id="event_start_date" name="event_start_date" class="form-control" required>
-    </div>
-    <div class="form-group">
-        <label for="event_end_date">End Date:</label>
-        <input type="date" id="event_end_date" name="event_end_date" class="form-control" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Save Event</button>
-</form>
+<div class="container-fluid">
+<h1 align="center">Chart Monthly</h1>
+    <div class="row">
 
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="save_event()">Save Event</button>
-            </div>
+        <div class="col-md-4">
+            <canvas id="enrollmentChart"></canvas>
+        </div>
+        <div class="col-md-4">
+            <canvas id="presentChart"></canvas>
+        </div>
+        <div class="col-md-4">
+            <canvas id="absentChart"></canvas>
+        </div>
+        <div class="col-md-12" style="max-width: 500px; margin: auto;">
+            <h1 align="center">Chart Today</h1>
+            <canvas id="AllOverStatusChart"></canvas>
         </div>
     </div>
-</div> -->
-<!-- End popup dialog box -->
+</div>
 
-<!-- <script>
-$(document).ready(function() {
-    $('#calendar').fullCalendar({
-        defaultView: 'month',
-        header: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'month,agendaWeek,agendaDay'
-        },
-        editable: true,
-        selectable: true,
-        selectHelper: true,
-        eventLimit: true, // allow "more" link when too many events
-        events: 'event_fetching_script.php', // Ensure this points to your PHP script
-        select: function(start, end) {
-            var title = prompt('Event Title:');
-            var eventData;
-            if (title) {
-                eventData = {
-                    title: title,
-                    start: start,
-                    end: end
-                };
-                $('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+// Console log to check data
+console.log("Enrollment Data: ", <?php echo json_encode($enrollmentData); ?>);
+console.log("Present Data: ", <?php echo json_encode($presentData); ?>);
+console.log("Absent Data: ", <?php echo json_encode($absentData); ?>);
+
+const chartOptions = {
+    type: 'bar',
+    options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 60,
+                ticks: {
+                    stepSize: 10
+                }
             }
-            $('#calendar').fullCalendar('unselect');
-        },
-        eventClick: function(event, jsEvent, view) {
-            alert('Event: ' + event.title);
         }
-    });
+    }
+};
+
+new Chart(document.getElementById('enrollmentChart'), {
+    ...chartOptions,
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Monthly Enrollment',
+            data: <?php echo json_encode($enrollmentData); ?>,
+            borderColor: 'rgb(0, 123, 255)',
+            backgroundColor: 'rgb(0, 123, 255)'
+        }]
+    }
 });
 
-function save_event() {
-    var event_name = $("#event_name").val();
-    var event_start_date = $("#event_start_date").val();
-    var event_end_date = $("#event_end_date").val();
-
-    $.ajax({
-        url: "save_event.php", // Points to the PHP script that will handle saving the event to the database
-        type: "POST",
-        data: {
-            event_name: event_name,
-            event_start_date: event_start_date,
-            event_end_date: event_end_date
-        },
-        success: function(data) {
-            $('#calendar').fullCalendar('refetchEvents'); // This will make the calendar refetch the events from the server
-            alert('Event Added Successfully');
-            $('#event_entry_modal').modal('hide');
-        },
-        error: function() {
-            alert('There was an error while saving the event!');
-        }
-    });
-}
-
-$("#eventForm").submit(function(e) {
-    e.preventDefault();  // Prevent default form submission
-    var formData = $(this).serialize();
-
-    $.ajax({
-        type: "POST",
-        url: "save_event.php",
-        data: formData,
-        dataType: 'json',
-        success: function(response) {
-            if (response.status === 'success') {
-                $('#calendar').fullCalendar('refetchEvents');  // Refresh the calendar
-                $('#event_entry_modal').modal('hide');  // Hide the modal
-                alert('Event added successfully!');
-            } else {
-                alert('Error: ' + response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            alert('AJAX error: ' + error);
-        }
-    });
+new Chart(document.getElementById('presentChart'), {
+    ...chartOptions,
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Monthly Present',
+            data: <?php echo json_encode($presentData); ?>,
+            borderColor: 'rgb(40, 167, 69)',
+            backgroundColor: 'rgb(40, 167, 69)'
+        }]
+    }
 });
 
-</script> -->
+new Chart(document.getElementById('absentChart'), {
+    ...chartOptions,
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Monthly Absent',
+            data: <?php echo json_encode($absentData); ?>,
+            borderColor: 'rgb(255, 51, 51)',
+            backgroundColor: 'rgb(255, 51, 51)'
+        }]
+    }
+});
+
+// Pie chart for All-Over Status
+new Chart(document.getElementById('AllOverStatusChart'), {
+    type: 'pie',
+    data: {
+        labels: ['Enrollment', 'Present', 'Absent'],
+        datasets: [{
+            label: 'Overall Status',
+            data: [<?php echo $enrolledTotal; ?>, <?php echo $presentToday; ?>, <?php echo $absentToday; ?>],
+            backgroundColor: [
+                'rgb(0, 123, 255)',
+                'rgb(40, 167, 69)',
+                'rgb(255, 51, 51)'
+            ],
+            borderColor: [
+                'rgb(0, 123, 255)',
+                'rgb(40, 167, 69)',
+                'rgb(255, 51, 51)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        }
+    }
+});
+});
+</script>
+
 
 
 
