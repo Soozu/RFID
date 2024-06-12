@@ -26,7 +26,7 @@ $presentToday = ($result->num_rows > 0) ? $result->fetch_assoc()['present_today'
 //sqlAbsentToday = "SELECT COUNT(*) as absent_today FROM users WHERE id NOT IN (SELECT user_id FROM users_logs WHERE checkindate = '$todayDate')";
 //$result = $conn->query($sqlAbsentToday);
 //$absentToday = ($result->num_rows > 0) ? $result->fetch_assoc()['absent_today'] : "No Data";
-    
+
 $conn->close();
 ?>
 
@@ -37,8 +37,15 @@ $conn->close();
     <title>Student Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </head>
 <body>
+
 
 <?php include('header.php'); ?>
 <h2 align="center">Student Dashboard</h2>
@@ -82,6 +89,100 @@ $conn->close();
         </div>
     </div>
 </div>
+
+
+<div id='calendar'></div>
+<div class="modal fade" id="event_entry_modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Add New Event</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="eventForm">
+                <div class="form-group">
+        <label for="event_name">Event Name:</label>
+        <input type="text" class="form-control" id="event_name">
+    </div>
+    <div class="form-group">
+        <label for="event_start_date">Start Date:</label>
+        <input type="date" class="form-control" id="event_start_date">
+    </div>
+    <div class="form-group">
+        <label for="event_end_date">End Date:</label>
+        <input type="date" class="form-control" id="event_end_date">
+    </div>
+    <button type="button" class="btn btn-primary" onclick="save_event()">Save Event</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="save_event()">Save Event</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End popup dialog box -->
+
+<script>
+$(document).ready(function() {
+    $('#calendar').fullCalendar({
+        defaultView: 'month',
+        header: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'month,agendaWeek,agendaDay'
+        },
+        editable: true,
+        selectable: true,
+        selectHelper: true,
+        eventLimit: true, // allow "more" link when too many events
+        events: 'path_to_your_event_fetching_script.php', // Ensure this points to your PHP script
+        select: function(start, end) {
+            var title = prompt('Event Title:');
+            var eventData;
+            if (title) {
+                eventData = {
+                    title: title,
+                    start: start,
+                    end: end
+                };
+                $('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
+            }
+            $('#calendar').fullCalendar('unselect');
+        },
+        eventClick: function(event, jsEvent, view) {
+            alert('Event: ' + event.title);
+        }
+    });
+});
+
+function save_event() {
+    var event_name = $("#event_name").val();
+    var event_start_date = $("#event_start_date").val();
+    var event_end_date = $("#event_end_date").val();
+
+    $.ajax({
+        url: "save_event.php", // Points to the PHP script that will handle saving the event to the database
+        type: "POST",
+        data: {
+            event_name: event_name,
+            event_start_date: event_start_date,
+            event_end_date: event_end_date
+        },
+        success: function(data) {
+            $('#calendar').fullCalendar('refetchEvents'); // This will make the calendar refetch the events from the server
+            alert('Event Added Successfully');
+            $('#event_entry_modal').modal('hide');
+        },
+        error: function() {
+            alert('There was an error while saving the event!');
+        }
+    });
+}
+</script>
 
 
 
