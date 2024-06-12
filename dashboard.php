@@ -140,7 +140,7 @@ $(document).ready(function() {
         selectable: true,
         selectHelper: true,
         eventLimit: true, 
-        events: 'path_to_your_event_fetching_script.php', // Ensure this points to your PHP script
+        events: 'event_fetching_script.php', // Ensure this points to your PHP script
         select: function(start, end) {
             var title = prompt('Event Title:');
             var eventData;
