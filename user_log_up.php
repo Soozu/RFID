@@ -54,7 +54,7 @@ if ($lastLogResult && mysqli_num_rows($lastLogResult) > 0) {
 
         // Prepare the email content
         $subject = "Attendance Notification";
-        $message = "Dear Parent,\n\nYour child has successfully entered the room.\n\n";
+        $message = "Dear Parent,\n\nYour child has successfully entered the room, ready to learn, ready to be brainy!\n\n";
         $message .= "Date: {$lastLog['checkindate']}\n";
         $message .= "Time In: {$lastLog['timein']}\n";
         
