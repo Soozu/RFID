@@ -20,7 +20,7 @@ header, main {
 .header { 
   padding: 5px;
   width: 100%;
-  height: 90px;
+  height: 100px;
   display: flex; /* Use flexbox for layout */
   align-items: center; /* Vertically center items */
   justify-content: center; /* Center content horizontally */
@@ -29,6 +29,7 @@ header, main {
 .logo {
   display: flex; /* Use flexbox for logo and text */
   align-items: center; /* Align items vertically */
+  
 }
 
 .logo a {
@@ -45,8 +46,8 @@ header, main {
 }
 
 .logo img {
-  width: 70px; /* Set width for logo image */
-  margin-right: 10px; /* Add space between image and text */
+  width: 90px; /* Set width for logo image */
+  margin-right: 15px; /* Add space between image and text */
 }
 
 #navbar {
@@ -79,7 +80,7 @@ header, main {
   overflow: hidden;
 /*   background-color: #42858bb9; */
   display: flex;
-  justify-content: center;
+  justify-content: center; 
 }
 
 .topnav a {
@@ -89,12 +90,13 @@ header, main {
   text-align: center;
   padding: 14px 16px;
   text-decoration: none !important;
-  font-size: 17px;
+  font-size: 24px;
+  font-weight: 500;
   border-radius: 10px;
 }
 
 .topnav a:hover {
-  background-color: #20a0acc2;
+  background-color: #32aee7;
   color: black;
 }
 

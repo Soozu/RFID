@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-  max-width: 1200px; /* Optimizes reading line length */
+  max-width: 100%; /* Optimizes reading line length */
   margin: 0 auto; /* Centers container in the page */
   padding: 20px;
   box-shadow: 0 2px 15px rgba(0,0,0,0.1); /* Subtle shadow for depth */
@@ -83,6 +83,26 @@ h1, h2 {
   margin-bottom: 10px;
 }
 #yearlyAttendanceChartContainer {
-  width: 70%;
-
+  width: 100%;
 }
+
+
+.barmonth{
+  font-size: 20px;
+  margin-right: 100px;
+  margin-top: 100px;
+}
+
+.piechart{
+  font-size: 20px;  
+ 
+}
+
+.baryear{
+  font-size: 20px;
+  
+  
+}
+
+
+

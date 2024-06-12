@@ -82,8 +82,9 @@ if (!isset($_SESSION['Admin-name'])) {
                         }
                       ?>
                     </select>
-				<input type="radio" name="gender" class="gender" value="Female">Female
-	          	<input type="radio" name="gender" class="gender" value="Male" checked="checked">Male
+					<input type="radio" name="gender" class="gender" value="Male" checked="checked">Male
+					<input type="radio" name="gender" class="gender" value="Female">Female
+	          	
 	      	</label >
 			</fieldset>
 			<button type="button" name="user_add" class="user_add">Add User</button>
