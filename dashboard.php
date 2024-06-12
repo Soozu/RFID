@@ -4,7 +4,7 @@ if (!isset($_SESSION['Admin-name'])) {
     header("location: login.php");
 }
 
-include 'connectDB.php'; // Ensure this path is correct
+include 'connectDB.php'; 
 
 // Fetch student logs total
 $sqlLogsTotal = "SELECT COUNT(*) as logs_total FROM users_logs";
@@ -139,7 +139,7 @@ $(document).ready(function() {
         editable: true,
         selectable: true,
         selectHelper: true,
-        eventLimit: true, // allow "more" link when too many events
+        eventLimit: true, 
         events: 'path_to_your_event_fetching_script.php', // Ensure this points to your PHP script
         select: function(start, end) {
             var title = prompt('Event Title:');
@@ -166,7 +166,7 @@ function save_event() {
     var event_end_date = $("#event_end_date").val();
 
     $.ajax({
-        url: "save_event.php", // Points to the PHP script that will handle saving the event to the database
+        url: "save_event.php", 
         type: "POST",
         data: {
             event_name: event_name,
