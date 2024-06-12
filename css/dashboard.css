@@ -59,6 +59,7 @@ h1, h2 {
   .cards-container {
       flex-direction: column;
   }
+
   .card {
       width: 100%; /* Full width on small screens */
       margin-bottom: 20px;
