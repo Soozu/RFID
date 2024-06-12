@@ -6,22 +6,38 @@ if (!isset($_SESSION['Admin-name'])) {
 
 include 'connectDB.php'; // Ensure this path is correct
 
-// Example function to fetch data
-function getMonthlyData($sql) {
-    global $conn;
-    $result = $conn->query($sql);
-    $data = array_fill(1, 12, 0);  // Pre-fill the array for all months with zero
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $data[(int)$row['Month']] = (int)$row['Count'];
-        }
-    }
-    return $data;
-}
+// Fetch data for the monthly chart
+$sql = "SELECT 
+            SUM(CASE WHEN card_out = 0 THEN 1 ELSE 0 END) AS present, 
+            SUM(CASE WHEN card_out = 1 THEN 1 ELSE 0 END) AS absent 
+        FROM users_logs 
+        WHERE MONTH(checkindate) = MONTH(CURRENT_DATE) 
+        AND YEAR(checkindate) = YEAR(CURRENT_DATE)";
+$result = $conn->query($sql);
+$monthlyData = $result->fetch_assoc();
 
-$enrollmentData = getMonthlyData("SELECT MONTH(user_date) AS Month, COUNT(*) AS Count FROM users GROUP BY MONTH(user_date)");
-$presentData = getMonthlyData("SELECT MONTH(checkindate) AS Month, COUNT(*) AS Count FROM users_logs WHERE timeout IS NOT NULL GROUP BY MONTH(checkindate)");
-$absentData = getMonthlyData("SELECT MONTH(checkindate) AS Month, COUNT(*) AS Count FROM users_logs WHERE timeout IS NULL GROUP BY MONTH(checkindate)");
+// Fetch data for the daily chart
+$sql = "SELECT 
+            SUM(CASE WHEN card_out = 0 THEN 1 ELSE 0 END) AS present, 
+            SUM(CASE WHEN card_out = 1 THEN 1 ELSE 0 END) AS absent 
+        FROM users_logs 
+        WHERE DATE(checkindate) = CURDATE()";
+$result = $conn->query($sql);
+$dailyData = $result->fetch_assoc();
+
+// Fetch data for the yearly chart
+$sql = "SELECT 
+            MONTH(checkindate) AS month,
+            SUM(CASE WHEN card_out = 0 THEN 1 ELSE 0 END) AS present, 
+            SUM(CASE WHEN card_out = 1 THEN 1 ELSE 0 END) AS absent 
+        FROM users_logs 
+        WHERE YEAR(checkindate) = YEAR(CURRENT_DATE)
+        GROUP BY MONTH(checkindate)";
+$result = $conn->query($sql);
+$yearlyData = array();
+while ($row = $result->fetch_assoc()) {
+    $yearlyData[] = $row;
+}
 
 // Fetch student logs total
 $sqlLogsTotal = "SELECT COUNT(*) as logs_total FROM users_logs";
@@ -54,11 +70,9 @@ $conn->close();
     <title>Student Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/dashboard.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
@@ -112,126 +126,103 @@ $conn->close();
     </div>
 </div>
 
-<div class="container-fluid">
-<h1 align="center">Chart Monthly</h1>
-    <div class="row">
+<div class="container">
+    <div class="chart-container">
+        <h1>Attendance for the Month</h1>
+        <canvas id="monthlyAttendanceChart" width="400" height="200"></canvas>
+    </div>
 
-        <div class="col-md-4">
-            <canvas id="enrollmentChart"></canvas>
-        </div>
-        <div class="col-md-4">
-            <canvas id="presentChart"></canvas>
-        </div>
-        <div class="col-md-4">
-            <canvas id="absentChart"></canvas>
-        </div>
-        <div class="col-md-12" style="max-width: 500px; margin: auto;">
-            <h1 align="center">Chart Today</h1>
-            <canvas id="AllOverStatusChart"></canvas>
-        </div>
+    <div class="chart-container">
+        <h1>Attendance Today</h1>
+        <canvas id="dailyAttendanceChart" width="400" height="200"></canvas>
+    </div>
+
+    <div class="chart-container" id="yearlyAttendanceChartContainer">
+        <h1>Attendance for the Year</h1>
+        <canvas id="yearlyAttendanceChart" width="800" height="400"></canvas>
     </div>
 </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+ // Data from PHP
+ var monthlyData = <?php echo json_encode($monthlyData); ?>;
+    var dailyData = <?php echo json_encode($dailyData); ?>;
+    var yearlyData = <?php echo json_encode($yearlyData); ?>;
 
-// Console log to check data
-console.log("Enrollment Data: ", <?php echo json_encode($enrollmentData); ?>);
-console.log("Present Data: ", <?php echo json_encode($presentData); ?>);
-console.log("Absent Data: ", <?php echo json_encode($absentData); ?>);
-
-const chartOptions = {
-    type: 'bar',
-    options: {
-        maintainAspectRatio: false,
-        responsive: true,
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: 60,
-                ticks: {
-                    stepSize: 10
+    // Monthly Attendance Chart
+    var ctx = document.getElementById('monthlyAttendanceChart').getContext('2d');
+    var monthlyAttendanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Present', 'Absent'],
+            datasets: [{
+                label: 'Attendance for the Month',
+                data: [monthlyData.present, monthlyData.absent],
+                backgroundColor: ['#42A5F5', '#FF6384']
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    min: 1,
+                    max: 50,
+                    ticks: {
+                        stepSize: 5
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true
                 }
             }
         }
-    }
-};
+    });
 
-new Chart(document.getElementById('enrollmentChart'), {
-    ...chartOptions,
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Monthly Enrollment',
-            data: <?php echo json_encode($enrollmentData); ?>,
-            borderColor: 'rgb(0, 123, 255)',
-            backgroundColor: 'rgb(0, 123, 255)'
-        }]
-    }
-});
+    // Daily Attendance Chart
+    var ctx2 = document.getElementById('dailyAttendanceChart').getContext('2d');
+    var dailyAttendanceChart = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: ['Present', 'Absent'],
+            datasets: [{
+                label: 'Attendance Today',
+                data: [dailyData.present, dailyData.absent],
+                backgroundColor: ['#42A5F5', '#FF6384']
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
 
-new Chart(document.getElementById('presentChart'), {
-    ...chartOptions,
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Monthly Present',
-            data: <?php echo json_encode($presentData); ?>,
-            borderColor: 'rgb(40, 167, 69)',
-            backgroundColor: 'rgb(40, 167, 69)'
-        }]
-    }
-});
-
-new Chart(document.getElementById('absentChart'), {
-    ...chartOptions,
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Monthly Absent',
-            data: <?php echo json_encode($absentData); ?>,
-            borderColor: 'rgb(255, 51, 51)',
-            backgroundColor: 'rgb(255, 51, 51)'
-        }]
-    }
-});
-
-// Pie chart for All-Over Status
-new Chart(document.getElementById('AllOverStatusChart'), {
-    type: 'pie',
-    data: {
-        labels: ['Enrollment', 'Present', 'Absent'],
-        datasets: [{
-            label: 'Overall Status',
-            data: [<?php echo $enrolledTotal; ?>, <?php echo $presentToday; ?>, <?php echo $absentToday; ?>],
-            backgroundColor: [
-                'rgb(0, 123, 255)',
-                'rgb(40, 167, 69)',
-                'rgb(255, 51, 51)'
-            ],
-            borderColor: [
-                'rgb(0, 123, 255)',
-                'rgb(40, 167, 69)',
-                'rgb(255, 51, 51)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top',
+    // Yearly Attendance Chart
+    var ctx3 = document.getElementById('yearlyAttendanceChart').getContext('2d');
+    var yearlyAttendanceChart = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            datasets: [
+                {
+                    label: 'Present',
+                    data: yearlyData.map(function(row) { return row.present; }),
+                    backgroundColor: '#42A5F5'
+                },
+                {
+                    label: 'Absent',
+                    data: yearlyData.map(function(row) { return row.absent; }),
+                    backgroundColor: '#FF6384'
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    min: 1,
+                    max: 50
+                }
             }
         }
-    }
-});
-});
+    });
 </script>
-
-
-
-
-<script src="js/dashboard.js"></script>
 </body>
 </html>

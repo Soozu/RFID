@@ -66,18 +66,23 @@ h1, h2 {
   }
 }
 
-.container-fluid {
-  width: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-  border: 1px solid #dedede;
-  border-radius: 5px;
-  box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
-}
 
-canvas {
-  width: 100% !important;
-  height: auto !important;
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+.chart-container {
+  width: 45%;
+}
+.chart-container h1 {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+#yearlyAttendanceChartContainer {
+  width: 70%;
+
 }
