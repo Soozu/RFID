@@ -83,7 +83,7 @@ $conn->close();
 <body>
  
 <?php include('header.php'); ?>
-<h2 align="center">Student Dashboard</h2>
+<h2 align ="center">Student Dashboard</h2>
 <div class="row">
     <div class="col-md-3 mb-4">
         <div class="card text-white bg-info">
@@ -127,17 +127,17 @@ $conn->close();
 </div>
 
 <div class="container">
-    <div class="chart-container">
+    <div class="barmonth">
         <h1>Attendance for the Month</h1>
         <canvas id="monthlyAttendanceChart" width="400" height="200"></canvas>
     </div>
 
-    <div class="chart-container">
+    <div class="piechart" id = "piechart">
         <h1>Attendance Today</h1>
         <canvas id="dailyAttendanceChart" width="400" height="200"></canvas>
     </div>
 
-    <div class="chart-container" id="yearlyAttendanceChartContainer">
+    <div class="baryear" id="yearlyAttendanceChartContainer">
         <h1>Attendance for the Year</h1>
         <canvas id="yearlyAttendanceChart" width="800" height="400"></canvas>
     </div>
