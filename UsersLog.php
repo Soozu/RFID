@@ -154,7 +154,10 @@ if (!isset($_SESSION['Admin-name'])) {
                     </select>
                   </div>
                   <div class="col-lg-4 col-sm-12">
-                    <label for="Fingerprint"><b>Export to Excel:</b></label>
+                    <label for="Fingerprint"><b>Export 1 Day:</b></label>
+                    <input type="submit" name="To_Excel" value="Export">
+
+                    <label for="Fingerprint"><b>Export 30 Days:</b></label>
                     <input type="submit" name="To_Excel" value="Export">
                   </div>
                 </div>
